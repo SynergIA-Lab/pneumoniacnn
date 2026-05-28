@@ -10,13 +10,19 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+import json
+
+config_path = os.path.join(os.path.dirname(__file__), "config.json")
+with open(config_path, 'r') as f:
+    config = json.load(f)
+
 # ---------------- FIXED SETTINGS ----------------
-MODEL_NAME = "DenseNet121"
+MODEL_NAME = config["model_name"]
 FOLD = 1
-SEED = 42
-IMG_SIZE = (224, 224)
-DATASET_DIR = "/Users/franciscoantoniogomezvela/Git-wrokspace/GitHub/proyectosTransferencia/pneumoniaCNN/Images"
-OUTPUT_DIR = f"Results/{MODEL_NAME}"
+SEED = config["seeds"][0]
+IMG_SIZE = tuple(config["img_size"])
+DATASET_DIR = config["dataset_dir"]
+OUTPUT_DIR = f"{config['output_dir']}/{MODEL_NAME}/seed_{SEED}"
 # -----------------------------------------------
 
 np.random.seed(SEED)
@@ -73,14 +79,14 @@ def load_img(path):
     img = tf.image.resize(img, IMG_SIZE)
     return (img / 255.0).numpy()
 
-def saliency(model, img):
-    img_tf = tf.convert_to_tensor(img[None])
+def saliency_map(model, img):
+    img_tf = tf.convert_to_tensor(img[None], dtype=tf.float32)
     with tf.GradientTape() as tape:
         tape.watch(img_tf)
         score = model(img_tf)[0][0]
-    grads = tape.gradient(score, img_tf)[0]
-    sal = tf.reduce_max(tf.abs(grads), axis=-1)
-    return sal.numpy()
+    grads = tape.gradient(score, img_tf)[0].numpy()
+    sal = np.max(np.abs(grads), axis=-1)
+    return (sal - sal.min()) / (sal.max() - sal.min() + 1e-9)
 
 def smoothgrad(model, img, n_samples=30, noise=0.1):
     """
@@ -104,15 +110,16 @@ def smoothgrad(model, img, n_samples=30, noise=0.1):
     sm = (sm - sm.min()) / (sm.max() - sm.min() + 1e-9)
     return sm
 
-def gradcam(model, img):
-    for layer in reversed(model.layers):
-        if isinstance(layer, tf.keras.layers.Conv2D):
-            target = layer.name
-            break
+def gradcam(model, img, layer_name=None):
+    if layer_name is None:
+        for layer in reversed(model.layers):
+            if isinstance(layer, tf.keras.layers.Conv2D):
+                layer_name = layer.name
+                break
 
     grad_model = tf.keras.Model(
         model.inputs,
-        [model.get_layer(target).output, model.output]
+        [model.get_layer(layer_name).output, model.output]
     )
 
     with tf.GradientTape() as tape:
@@ -128,10 +135,6 @@ def gradcam(model, img):
     return cam
 
 def main():
-    model = tf.keras.models.load_model(
-        f"{OUTPUT_DIR}/best_fold{FOLD}.keras"
-    )
-
     paths = []
     # Guardamos tuplas (ruta, etiqueta) para saber qué es cada imagen
     for cls in ["NORMAL", "PNEUMONIA"]:
@@ -140,43 +143,49 @@ def main():
         imgs = sorted(os.listdir(cls_dir))[:4]
         paths += [(os.path.join(cls_dir, i), label) for i in imgs]
 
-    for i, (p, label) in enumerate(paths):
-        img = load_img(p)
-        sal = saliency(model, img)
-        cam = gradcam(model, img)
+    for protocol, model_filename in [("frozen", f"best_p1_fold{FOLD}.keras"), ("finetuned", f"best_p2_fold{FOLD}.keras")]:
+        print(f"Generating XAI maps for {protocol} model...")
+        model = tf.keras.models.load_model(
+            f"{OUTPUT_DIR}/{model_filename}"
+        )
 
-        plt.figure(figsize=(15, 5)) # Aumentamos un poco el ancho para los títulos
+        for i, (p, label) in enumerate(paths):
+            img = load_img(p)
+            sal = saliency_map(model, img)
+            smg = smoothgrad(model, img)
+            cam = gradcam(model, img)
 
-        # 1. Imagen Original con Label
-        plt.subplot(1, 4, 1)
-        plt.imshow(img)
-        plt.title(f"Original (Label= {label})", fontsize=12)
-        plt.axis("off")
+            plt.figure(figsize=(15, 5)) # Aumentamos un poco el ancho para los títulos
 
-        # 2. Saliency Map
-        plt.subplot(1, 4, 2)
-        plt.imshow(sal, cmap="inferno")
-        plt.title("Saliency Map", fontsize=12)
-        plt.axis("off")
+            # 1. Imagen Original con Label
+            plt.subplot(1, 4, 1)
+            plt.imshow(img)
+            plt.title(f"Original (Label= {label})", fontsize=12)
+            plt.axis("off")
 
-        # 3. SmoothGrad
-        plt.subplot(1, 4, 3)
-        plt.imshow(sal, cmap="inferno")
-        plt.title("SmoothGrad", fontsize=12)
-        plt.axis("off")
+            # 2. Saliency Map
+            plt.subplot(1, 4, 2)
+            plt.imshow(sal, cmap="inferno")
+            plt.title("Saliency Map", fontsize=12)
+            plt.axis("off")
 
-        # 4. Grad-CAM (Superpuesta)
-        plt.subplot(1, 4, 4)
-        plt.imshow(img, alpha=0.5)
-        plt.imshow(cam, cmap="jet", alpha=0.5)
-        plt.title("Grad-CAM Overlay", fontsize=12)
-        plt.axis("off")
+            # 3. SmoothGrad
+            plt.subplot(1, 4, 3)
+            plt.imshow(smg, cmap="inferno")
+            plt.title("SmoothGrad", fontsize=12)
+            plt.axis("off")
 
-        # Ajuste para que no se solapen los títulos
-        plt.tight_layout()
-        plt.savefig(f"{OUTPUT_DIR}/xai_example_{i}.png", bbox_inches='tight', dpi=300)
-        plt.close()
+            # 4. Grad-CAM (Superpuesta)
+            plt.subplot(1, 4, 4)
+            plt.imshow(img, alpha=0.5)
+            plt.imshow(cam, cmap="jet", alpha=0.5)
+            plt.title("Grad-CAM Overlay", fontsize=12)
+            plt.axis("off")
 
+            # Ajuste para que no se solapen los títulos
+            plt.tight_layout()
+            plt.savefig(f"{OUTPUT_DIR}/xai_example_{i}_{protocol}.png", bbox_inches='tight', dpi=300)
+            plt.close()
    
 
 if __name__ == "__main__":

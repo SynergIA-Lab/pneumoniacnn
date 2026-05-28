@@ -38,38 +38,53 @@ This study is featured for:
 
 ----
 
+Environment Setup
+=================
+
+To make setting up the environment as easy as possible across Windows, macOS, and Linux, we have included an automated setup script. 
+
+Simply run the following command in your terminal from the project root:
+
+.. code-block:: bash
+
+   python setup.py
+
+This script will automatically:
+1) Create a local virtual environment (``.venv``) in the project root.
+2) Upgrade ``pip`` inside the virtual environment.
+3) Install all required dependencies from ``requirements.txt``.
+
+*Note for IDE users (VS Code, Cursor, PyCharm):* The IDE will automatically detect the new ``.venv`` environment in the project folder. Once detected, clicking the "Play" button will execute the scripts using this environment automatically, ensuring all libraries (including ``keras-tuner``) are resolved.
+
 Execution
 =========
 
-1) **Training models:** First, the models must be trained. This file includes CNN training and predictive performance evaluation using 5-fold stratified cross-validation with class-balanced undersampling.
+1) **Hyperparameter Tuning:** Find the optimal hyperparameter values using Bayesian Optimization:
 
 .. code-block:: bash
 
-   python3 train_kfold.py
+   python code/1_tune_hyperparameters.py
 
-2) External validation actions and XAI evaluations can be carried out in parallel.
+Update the ``"hyperparameters"`` block in ``code/config.json`` with the best parameters output by the script.
 
-2.1) **XAI execution:** This study performs a qualitative analysis (xai_qualitative.py) and a quantitative analysis (xai_quantitative.py).
-
-.. code-block:: bash
-
-   python3 xai_qualitative.py
-   python3 xai_quantitative.py
-
-2.2) **External validation:** Generalization experiment on an external pneumonia dataset. The model is NOT retrained. The best model from the paper (fold 1) is evaluated on a balanced external dataset (500 NORMAL + 500 PNEUMONIA).
+2) **Training models:** Train the CNN architectures using 5-fold stratified cross-validation and multiple seeds for robustness:
 
 .. code-block:: bash
 
-   python3 external_validation.py
+   python code/2_train_kfold.py
 
-**Required Dependencies**\ :
+3) **External validation:** Evaluate generalization performance of the models on an independent external dataset (adult cohort):
 
-* **Python**>=3.11
-* **numpy**>=2.0.1
-* **pandas**>=2.2.2
-* **tensorflow**>=2.17.1
-* **matplotlib**>=3.9.0
-* **scikit-learn**>=1.6.0
+.. code-block:: bash
+
+   python code/3_external_validation.py
+
+4) **Explainable AI (XAI) execution:** Run the qualitative and quantitative evaluations:
+
+.. code-block:: bash
+
+   python code/4_xai_qualitative.py
+   python code/5_xai_quantitative.py
 
 ----
 

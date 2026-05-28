@@ -1,0 +1,29 @@
+{
+    "dataset_dir": "C:/Users/aurel/git-repositories/pneumoniacnn/Images",
+    "external_dataset_dir": "C:/Users/aurel/git-repositories/pneumoniacnn/ExternalDataset",
+    "output_dir": "Results",
+    "img_size": [224, 224],
+    "batch_size": 64,
+    "epochs": 25,
+    "epochs_phase1": 15,
+    "epochs_phase2": 10,
+    "n_splits": 5,
+    "seeds": [42, 123, 2026],
+    "model_name": "ResNet18",
+    "architectures": [
+        "DenseNet121",
+        "MobileNetV2",
+        "ResNet50",
+        "EfficientNetB0",
+        "ConvNeXtTiny",
+        "ResNet18"
+    ],
+    "hyperparameters": {
+        "learning_rate": 0.0001,
+        "dense_1_units": 512,
+        "dropout_1_rate": 0.4,
+        "dense_2_units": 256,
+        "dropout_2_rate": 0.3,
+        "fine_tune_learning_rate": 1e-05
+    }
+}
