@@ -3,16 +3,6 @@ Performance-Interpretability Trade-offs and Generalization in Deep Learning for 
 
 **Deployment & Documentation & Stats**
 
-.. image:: https://img.shields.io/github/stars/SynergIA-Lab/pneumoniacnn.svg
-   :target: https://github.com/SynergIA-Lab/pneumoniacnn/stargazers
-   :alt: GitHub stars
-
-
-.. image:: https://img.shields.io/github/forks/SynergIA-Lab/pneumoniacnn.svg?color=blue
-   :target: https://github.com/SynergIA-Lab/pneumoniacnn/network
-   :alt: GitHub forks
-
-
 .. image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
    :target: https://github.com/SynergIA-Lab/pneumoniacnn/blob/main/LICENSE
    :alt: License
