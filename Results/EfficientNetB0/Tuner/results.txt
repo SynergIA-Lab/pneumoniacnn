@@ -1,0 +1,24 @@
+Trial 10 Complete [00h 04m 36s]
+val_loss: 0.5837586522102356
+
+Best val_loss So Far: 0.5835890173912048
+Total elapsed time: 00h 36m 34s
+
+===== TUNING RESULTS =====
+Optimal Learning Rate: 0.0005
+Optimal Dense 1 Units: 512
+Optimal Dropout 1 Rate: 0.2
+Optimal Dense 2 Units: 128
+Optimal Dropout 2 Rate: 0.30000000000000004
+
+Detailed tuning results saved to: Results\Tuner\tuning_results_summary.csv
+
+To use these parameters, update your config.json with:
+{
+    "learning_rate": 0.0005,
+    "dense_1_units": 512,
+    "dropout_1_rate": 0.2,
+    "dense_2_units": 128,
+    "dropout_2_rate": 0.30000000000000004,
+    "base_trainable": false
+}

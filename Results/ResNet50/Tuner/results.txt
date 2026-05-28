@@ -1,0 +1,21 @@
+Best val_loss So Far: 0.3142054080963135
+Total elapsed time: 01h 00m 48s
+
+===== TUNING RESULTS =====
+Optimal Learning Rate: 0.0005
+Optimal Dense 1 Units: 512
+Optimal Dropout 1 Rate: 0.30000000000000004
+Optimal Dense 2 Units: 256
+Optimal Dropout 2 Rate: 0.2
+
+Detailed tuning results saved to: Results/Tuner/tuning_results_summary.csv
+
+To use these parameters, update your config.json with:
+{
+    "learning_rate": 0.0005,
+    "dense_1_units": 512,
+    "dropout_1_rate": 0.30000000000000004,
+    "dense_2_units": 256,
+    "dropout_2_rate": 0.2,
+    "base_trainable": false
+}
