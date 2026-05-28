@@ -89,4 +89,4 @@ We would appreciate citations to the following paper::
 
 **Download our models**\ :
 
-You can download the training templates used from [here](https://drive.google.com/drive/folders/1loicfGMJPnHikJ2PMJ7HopHUj82NXAN9)
+You can download the training templates used from `here <https://drive.google.com/drive/folders/1loicfGMJPnHikJ2PMJ7HopHUj82NXAN9>`_.
