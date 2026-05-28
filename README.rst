@@ -84,3 +84,9 @@ This paper is under review.
 We would appreciate citations to the following paper::
 
    Under review
+
+----
+
+**Download our models**\ :
+
+You can download the training templates used from [here](https://drive.google.com/drive/folders/1loicfGMJPnHikJ2PMJ7HopHUj82NXAN9)
