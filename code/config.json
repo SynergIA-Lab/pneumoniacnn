@@ -2,21 +2,28 @@
     "dataset_dir": "C:/Users/aurel/git-repositories/pneumoniacnn/Images",
     "external_dataset_dir": "C:/Users/aurel/git-repositories/pneumoniacnn/ExternalDataset",
     "output_dir": "Results",
-    "img_size": [224, 224],
+    "img_size": [
+        224,
+        224
+    ],
     "batch_size": 64,
     "epochs": 25,
     "epochs_phase1": 15,
     "epochs_phase2": 10,
     "n_splits": 5,
-    "seeds": [42, 123, 2026],
-    "model_name": "ResNet18",
+    "seeds": [
+        42,
+        123,
+        2026
+    ],
+    "model_name": "VGG16",
     "architectures": [
         "DenseNet121",
         "MobileNetV2",
         "ResNet50",
         "EfficientNetB0",
         "ConvNeXtTiny",
-        "ResNet18"
+        "VGG16"
     ],
     "hyperparameters": {
         "learning_rate": 0.0001,

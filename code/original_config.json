@@ -2,11 +2,18 @@
     "dataset_dir": "C:/Users/aurel/git-repositories/pneumoniacnn/Images",
     "external_dataset_dir": "/Users/franciscoantoniogomezvela/Git-wrokspace/GitHub/proyectosTransferencia/pneumoniaCNN/ExternalDataset",
     "output_dir": "Results",
-    "img_size": [224, 224],
+    "img_size": [
+        224,
+        224
+    ],
     "batch_size": 64,
     "epochs": 25,
     "n_splits": 5,
-    "seeds": [42, 123, 2026],
+    "seeds": [
+        42,
+        123,
+        2026
+    ],
     "model_name": "DenseNet121",
     "architectures": [
         "DenseNet121",
@@ -14,7 +21,7 @@
         "ResNet50",
         "EfficientNetB0",
         "ConvNeXtTiny",
-        "ResNet18"
+        "VGG16"
     ],
     "hyperparameters": {
         "learning_rate": 1e-4,

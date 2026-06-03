@@ -33,7 +33,7 @@ from sklearn.metrics import (
 
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.applications import (
-    ResNet50, MobileNetV2, DenseNet121, EfficientNetB0, ConvNeXtTiny
+    ResNet50, MobileNetV2, DenseNet121, EfficientNetB0, ConvNeXtTiny, VGG16
 )
 
 # ======================================================
@@ -107,44 +107,6 @@ def build_dataset(paths, labels, train=True, seed=42):
 # MODEL
 # ======================================================
 
-def build_resnet18(input_shape=(224, 224, 3)):
-    inputs = layers.Input(shape=input_shape)
-    
-    # Initial Convolution
-    x = layers.Conv2D(64, kernel_size=7, strides=2, padding='same', use_bias=False)(inputs)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation('relu')(x)
-    x = layers.MaxPooling2D(pool_size=3, strides=2, padding='same')(x)
-    
-    def resnet_block(x, filters, strides=1):
-        shortcut = x
-        x = layers.Conv2D(filters, kernel_size=3, strides=strides, padding='same', use_bias=False)(x)
-        x = layers.BatchNormalization()(x)
-        x = layers.Activation('relu')(x)
-        
-        x = layers.Conv2D(filters, kernel_size=3, strides=1, padding='same', use_bias=False)(x)
-        x = layers.BatchNormalization()(x)
-        
-        if strides != 1 or shortcut.shape[-1] != filters:
-            shortcut = layers.Conv2D(filters, kernel_size=1, strides=strides, padding='same', use_bias=False)(shortcut)
-            shortcut = layers.BatchNormalization()(shortcut)
-            
-        x = layers.Add()([x, shortcut])
-        x = layers.Activation('relu')(x)
-        return x
-
-    x = resnet_block(x, 64)
-    x = resnet_block(x, 64)
-    x = resnet_block(x, 128, strides=2)
-    x = resnet_block(x, 128)
-    x = resnet_block(x, 256, strides=2)
-    x = resnet_block(x, 256)
-    x = resnet_block(x, 512, strides=2)
-    x = resnet_block(x, 512)
-    
-    model = models.Model(inputs=inputs, outputs=x, name='ResNet18')
-    return model
-
 def build_model(architecture="ResNet50", hp=None):
     """
     Creates a CNN classifier using hyperparameters defined in config.
@@ -165,17 +127,13 @@ def build_model(architecture="ResNet50", hp=None):
             base = EfficientNetB0(weights="imagenet", include_top=False, input_shape=(*IMG_SIZE,3))
         elif architecture == "ConvNeXtTiny":
             base = ConvNeXtTiny(weights="imagenet", include_top=False, input_shape=(*IMG_SIZE, 3))
-        elif architecture == "ResNet18":
-            print("Warning: Using custom ResNet18 architecture without ImageNet pre-trained weights.")
-            base = build_resnet18(input_shape=(*IMG_SIZE, 3))
+        elif architecture == "VGG16":
+            base = VGG16(weights="imagenet", include_top=False, input_shape=(*IMG_SIZE, 3))
         else:
             raise ValueError("Unknown architecture")
             
         # ---- CLASSIFICATION HEAD ----
-        if architecture != "ResNet18":
-            base.trainable = False
-        else:
-            base.trainable = True
+        base.trainable = True
 
         x = layers.GlobalAveragePooling2D()(base.output)
         x = layers.Dense(hp["dense_1_units"], activation="relu")(x)
@@ -287,12 +245,12 @@ def main():
             print(f"--- PHASE 2: Fine-Tuning Base Model (Fold {fold}) ---")
             
             UNFREEZE_PER_MODEL = {
-                "ResNet18":      10,
                 "ResNet50":      15,
                 "DenseNet121":   20,
                 "MobileNetV2":   15,
                 "EfficientNetB0":15,
-                "ConvNeXtTiny":  20
+                "ConvNeXtTiny":  20,
+                "VGG16":         8
             }
             unfreeze_layers = UNFREEZE_PER_MODEL.get(MODEL_NAME, 15)
 
